@@ -1,0 +1,6 @@
+{
+  "name": "FINSAFE Navigation Prototype",
+  "description": "Enterprise SME financial intelligence command center and 3D Dimensional Landing Page with dual navigation layers, AI Copilot, Safe Surplus engine, Investment intelligence, Transaction center, and Model explainability.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
