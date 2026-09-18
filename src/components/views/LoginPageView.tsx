@@ -18,7 +18,7 @@ import {
   Globe
 } from 'lucide-react';
 import { SmeAccount, ActiveTabKey } from '../../types';
-import { DimensionalField } from '../../shaders/DimensionalField';
+import { DataPixelArcCanvas } from '../../shaders/data-pixel-arc/DataPixelArcCanvas';
 import { FinsafeLogo } from '../FinsafeLogo';
 
 interface LoginPageViewProps {
@@ -42,7 +42,9 @@ export const LoginPageView: React.FC<LoginPageViewProps> = ({
   const [otpCode, setOtpCode] = useState<string>('849201');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [authStep, setAuthStep] = useState<'credentials' | 'otp'>('credentials');
-  const [palette, setPalette] = useState<'cyan-purple' | 'aurora'>('cyan-purple');
+  const [hueShift, setHueShift] = useState<number>(0);
+  const HUE_PRESETS = [0, 160, 280, 60] as const;
+  const HUE_LABELS  = ['Emerald', 'Teal', 'Violet', 'Amber'] as const;
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,9 +75,19 @@ export const LoginPageView: React.FC<LoginPageViewProps> = ({
 
   return (
     <div className="relative min-h-screen w-full bg-[#050608] text-slate-100 flex flex-col justify-between overflow-x-hidden select-none font-sans">
-      {/* 3D WebGL Dimensional Field Background */}
-      <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
-        <DimensionalField palette={palette} opacity={0.88} />
+      {/* Data Pixel Arc — animated green pixel-grid arc background */}
+      <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+        <DataPixelArcCanvas
+          mode="dark"
+          speed={1.0}
+          pixelSize={9}
+          arcCenter={0.42}
+          arcDrop={0.88}
+          thickness={0.38}
+          brightness={1.0}
+          hue={hueShift}
+          saturation={1.0}
+        />
       </div>
 
       {/* Dark Vignette Overlay */}
@@ -96,15 +108,23 @@ export const LoginPageView: React.FC<LoginPageViewProps> = ({
           <FinsafeLogo size="sm" showTagline={false} />
         </div>
 
-        {/* Atmosphere Toggle */}
+        {/* Hue Cycle Toggle */}
         <button
           type="button"
-          onClick={() => setPalette(prev => prev === 'cyan-purple' ? 'aurora' : 'cyan-purple')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900/80 border border-slate-800 hover:border-cyan-500/60 text-slate-300 transition-all cursor-pointer backdrop-blur-md"
-          title="Toggle Atmosphere"
+          onClick={() => setHueShift(prev => {
+            const idx = HUE_PRESETS.indexOf(prev as typeof HUE_PRESETS[number]);
+            return HUE_PRESETS[(idx + 1) % HUE_PRESETS.length];
+          })}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900/80 border border-slate-800 hover:border-emerald-500/60 text-slate-300 transition-all cursor-pointer backdrop-blur-md"
+          title="Cycle Arc Color"
         >
-          <span className={`w-2 h-2 rounded-full ${palette === 'aurora' ? 'bg-fuchsia-400 shadow-[0_0_8px_#e879f9]' : 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]'}`} />
-          <span className="font-mono text-[11px] hidden sm:inline">{palette === 'aurora' ? 'Aurora' : 'Void'}</span>
+          <span
+            className="w-2 h-2 rounded-full transition-colors duration-500"
+            style={{ backgroundColor: `hsl(${(130 + hueShift) % 360}, 80%, 55%)`, boxShadow: `0 0 8px hsl(${(130 + hueShift) % 360}, 80%, 55%)` }}
+          />
+          <span className="font-mono text-[11px] hidden sm:inline">
+            {HUE_LABELS[HUE_PRESETS.indexOf(hueShift as typeof HUE_PRESETS[number])] ?? 'Emerald'}
+          </span>
         </button>
       </header>
 
